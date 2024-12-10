@@ -53,7 +53,7 @@ J食堂,34.760327,135.625709,audio5
 // 現在地を取得してCSVデータと照合
 function checkCoordinates() {
     const outputElement = document.getElementById("output");
-    const tolerance = 0.00027; // 3メートルに相当する誤差範囲
+    const tolerance = 0.0001; // 3メートルに相当する誤差範囲
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
