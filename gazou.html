@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" href="./styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS 自動照合と音声再生</title>
+</head>
+<body>
+    <h1>GPS 自動照合と音声再生</h1>
+    <button onclick="checkCoordinates()">現在地を取得して照合</button>
+    <p id="output">ここに結果が表示されます。</p>
+    <img id="locationImage" src="" alt="場所の画像" style="display:none; max-width: 300px;">
+
+    <!-- 音声ファイル -->
+    <audio id="audio1" src="001_ずんだもん（ノーマル）_ここは３D造形先端….wav"></audio>
+    <audio id="audio2" src="001_ずんだもん（ノーマル）_ここはA号館西側です.wav"></audio>
+    <audio id="audio3" src="001_ずんだもん（ノーマル）_ここはA号館西中央….wav"></audio>
+    <audio id="audio4" src="001_ずんだもん（ノーマル）_ここはA号館東側で….wav"></audio>
+    <audio id="audio5" src="001_ずんだもん（ノーマル）_ここはJ食堂です.wav"></audio>
+    <audio id="audio6" src="001_ずんだもん（ノーマル）_ここはコンビニです.wav"></audio>
+    <audio id="audio7" src="001_ずんだもん（ノーマル）_ここは医務室です.wav"></audio>
+    <audio id="audio8" src="001_ずんだもん（ノーマル）_ここは教室です.wav"></audio>
+    <audio id="audio9" src="001_ずんだもん（ノーマル）_ここは男子更衣室です.wav"></audio>
+    <audio id="audio10" src="001_ずんだもん（ノーマル）_ここは物理質問相談….wav"></audio>
+    <audio id="audio11" src="001_ずんだもん（ノーマル）_ここは裏門です.wav"></audio>
+
+<script>
+    // CSVデータ（エリア情報、緯度、経度、音声ID、画像ファイルパス）
+    const data = `
+erea,緯度,経度,audioId,image
+男子更衣室,34.760327,135.625333,audio9,男子更衣室.png
+裏門,34.761897,135.624964,audio11,裏門.png
+A号館西側,34.760104,135.626045,audio2,A号館西側.png
+医務室,34.760146,135.626132,audio7,医務室.png
+A号館西中央,34.760124,135.626618,audio3,A号館西中央.png
+A号館東側,34.760264,135.627461,audio4,A号館東側.png
+物理質問相談室,34.760159,135.627331,audio10,物理質問相談室.png
+3D造形先端口工センター,34.760286,135.627407,audio1,3D造形先端.png
+J食堂,34.760327,135.625709,audio5,J食堂.jpg
+コンビニ,34.759927,135.627414,audio6,コンビニ.jpg
+教室,34.7695531,135.6290685,audio8,教室.png
+`;
+
+    // 現在地を取得してCSVデータと照合
+    function checkCoordinates() {
+        const outputElement = document.getElementById("output");
+        const imageElement = document.getElementById("locationImage");
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+
+                    let tolerance = 0.0001; // 約10メートル
+                    if (accuracy > 10) {
+                        tolerance = 0.0005; // 約50メートル
+                    }
+                    outputElement.innerText = `現在地の緯度: ${latitude}, 経度: ${longitude}\n誤差: 約${accuracy}m\n許容誤差範囲: ${tolerance}\n照合中...`;
+
+                    const lines = data.trim().split('\n');
+                    const rows = lines.slice(1);
+
+                    const matchedRow = rows.find(line => {
+                        const [erea, lat, lon] = line.split(',');
+                        return (
+                            Math.abs(parseFloat(lat) - latitude) < tolerance &&
+                            Math.abs(parseFloat(lon) - longitude) < tolerance
+                        );
+                    });
+
+                    if (matchedRow) {
+                        const [erea, , , audioId, imagePath] = matchedRow.split(',');
+                        outputElement.innerText = `一致しました！場所: ${erea}`;
+                        playAudio(audioId);
+                        showImage(imagePath);
+                    } else {
+                        outputElement.innerText = "一致する場所が見つかりませんでした。";
+                        imageElement.style.display = "none"; // 画像を非表示
+                    }
+                },
+                (error) => {
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            outputElement.innerText = "位置情報の取得が拒否されました。";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            outputElement.innerText = "位置情報が利用できません。";
+                            break;
+                        case error.TIMEOUT:
+                            outputElement.innerText = "タイムアウトしました。";
+                            break;
+                        default:
+                            outputElement.innerText = "不明なエラーが発生しました。";
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            outputElement.innerText = "このブラウザでは位置情報がサポートされていません。";
+        }
+    }
+
+    // 音声を再生
+    function playAudio(audioId) {
+        const audio = document.getElementById(audioId);
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            alert("音声ファイルが見つかりません。");
+        }
+    }
+
+    // 画像を表示
+    function showImage(imagePath) {
+        const imageElement = document.getElementById("locationImage");
+        imageElement.src = `./${imagePath}`;
+        imageElement.style.display = "block";
+    }
+</script>
+</body>
+</html>
