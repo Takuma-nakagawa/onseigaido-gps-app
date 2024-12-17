@@ -1,3 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS 自動照合と音声再生</title>
+</head>
+<body>
+    <h1>GPS 自動照合と音声再生</h1>
+    <button onclick="checkCoordinates()">現在地を取得して照合</button>
+    <p id="output">ここに結果が表示されます。</p>
+
+    <!-- 音声ファイル -->
+    <audio id="audio1" src="001_ずんだもん（ノーマル）_ここは３D造形先端….wav"></audio>
+    <audio id="audio2" src="001_ずんだもん（ノーマル）_ここはA号館西側です.wav"></audio>
+    <audio id="audio3" src="001_ずんだもん（ノーマル）_ここはA号館西中央….wav"></audio>
+    <audio id="audio4" src="001_ずんだもん（ノーマル）_ここはA号館東側で….wav"></audio>
+    <audio id="audio5" src="001_ずんだもん（ノーマル）_ここはJ食堂です.wav"></audio>
+    <audio id="audio6" src="001_ずんだもん（ノーマル）_ここはコンビニです.wav"></audio>
+    <audio id="audio7" src="001_ずんだもん（ノーマル）_ここは医務室です.wav"></audio>
+    <audio id="audio8" src="001_ずんだもん（ノーマル）_ここは教室です.wav"></audio>
+    <audio id="audio9" src="001_ずんだもん（ノーマル）_ここは男子更衣室です.wav"></audio>
+    <audio id="audio10" src="001_ずんだもん（ノーマル）_ここは物理質問相談….wav"></audio>
+    <audio id="audio11" src="001_ずんだもん（ノーマル）_ここは裏門です.wav"></audio>
 <script>
     // CSVデータ（エリア情報と対応音声ID）
     const data = `
@@ -89,3 +114,5 @@ J食堂,34.760327,135.625709,audio5
         }
     }
 </script>
+    </body>
+</html>
