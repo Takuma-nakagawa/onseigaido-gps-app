@@ -1,0 +1,91 @@
+<script>
+    // CSVデータ（エリア情報と対応音声ID）
+    const data = `
+erea,緯度,経度,audioId
+男子更衣室,34.760327,135.625333,audio9
+裏門,34.761897,135.624964,audio11
+A号館西側,34.760104,135.626045,audio2
+医務室,34.760146,135.626132,audio7
+A号館西中央,34.760124,135.626618,audio3
+A号館東側,34.760264,135.627461,audio4
+物理質問相談室,34.760159,135.627331,audio10
+3D造形先端口工センター,34.760286,135.627407,audio1
+J食堂,34.760327,135.625709,audio5
+コンビニ,34.759927,135.627414,audio6
+教室,34.7695531,135.6290685,audio8
+研究室,34.760111,135.627403,audio12
+`;
+
+    // 現在地を取得してCSVデータと照合
+    function checkCoordinates() {
+        const outputElement = document.getElementById("output");
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+
+                    // 初期の誤差範囲（10メートル以内を基準とする）
+                    let tolerance = 0.0001; // 約10メートル
+                    if (accuracy > 10) {
+                        // 精度が悪い場合、誤差範囲を広げる（50メートル = 0.0005）
+                        tolerance = 0.0005;
+                    }
+                    outputElement.innerText = `現在地の緯度: ${latitude}, 経度: ${longitude}\n誤差: 約${accuracy}m\n許容誤差範囲: ${tolerance}\n照合中...`;
+
+                    const lines = data.trim().split('\n');
+                    const rows = lines.slice(1);
+
+                    const matchedRow = rows.find(line => {
+                        const [erea, lat, lon] = line.split(',');
+                        return (
+                            Math.abs(parseFloat(lat) - latitude) < tolerance &&
+                            Math.abs(parseFloat(lon) - longitude) < tolerance
+                        );
+                    });
+
+                    if (matchedRow) {
+                        const [erea, , , audioId] = matchedRow.split(',');
+                        outputElement.innerText = `一致しました！場所: ${erea}`;
+                        playAudio(audioId);
+                    } else {
+                        outputElement.innerText = "一致する場所が見つかりませんでした。";
+                    }
+                },
+                (error) => {
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            outputElement.innerText = "位置情報の取得が拒否されました。";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            outputElement.innerText = "位置情報が利用できません。";
+                            break;
+                        case error.TIMEOUT:
+                            outputElement.innerText = "タイムアウトしました。";
+                            break;
+                        default:
+                            outputElement.innerText = "不明なエラーが発生しました。";
+                    }
+                },
+                {
+                    enableHighAccuracy: true, // 高精度モードを有効化
+                    timeout: 15000, // 最大15秒待つ
+                    maximumAge: 0 // キャッシュを無効化し常に最新情報を取得
+                }
+            );
+        } else {
+            outputElement.innerText = "このブラウザでは位置情報がサポートされていません。";
+        }
+    }
+
+    // 音声を再生
+    function playAudio(audioId) {
+        const audio = document.getElementById(audioId);
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            alert("音声ファイルが見つかりません。");
+        }
+    }
+</script>
